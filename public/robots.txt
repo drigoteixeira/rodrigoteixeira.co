@@ -1,0 +1,5 @@
+# Todos os buscadores podem rastrear o site inteiro.
+User-agent: *
+Allow: /
+
+Sitemap: https://rodrigoteixeira.co/sitemap.xml

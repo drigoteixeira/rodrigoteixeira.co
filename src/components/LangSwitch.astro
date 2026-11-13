@@ -1,0 +1,18 @@
+---
+// Alternância PT / EN. O idioma ativo fica sublinhado e marcado com aria-current.
+import type { Lang } from '../lib/images';
+interface Props { lang: Lang; ptHref: string; enHref: string }
+const { lang, ptHref, enHref } = Astro.props;
+---
+<span class="lang">
+  <a href={ptHref} lang="pt-BR" hreflang="pt-BR" aria-current={lang === 'pt' ? 'true' : undefined} class:list={{ on: lang === 'pt' }}>PT</a>
+  <span aria-hidden="true">/</span>
+  <a href={enHref} lang="en" hreflang="en" aria-current={lang === 'en' ? 'true' : undefined} class:list={{ on: lang === 'en' }}>EN</a>
+</span>
+
+<style>
+  .lang { display: inline-flex; align-items: center; gap: 6px; color: var(--color-muted); }
+  .lang a { padding: 14px 0; color: var(--color-muted); }
+  .lang a.on { color: var(--color-ink); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 5px; }
+  :global(.menu) .lang, :global(.menu) .lang a.on { color: inherit; }
+</style>

@@ -1,0 +1,27 @@
+---
+// Padrão assimétrico: rótulo à esquerda, conteúdo à direita (empilhado no mobile).
+import SectionLabel from './SectionLabel.astro';
+interface Props { id: string; label: string; top?: 'xl' | 'l' }
+const { id, label, top = 'l' } = Astro.props;
+---
+<section id={id} aria-labelledby={`${id}-t`} class={`split container reveal top-${top}`}>
+  <div class="grid">
+    <div class="split__label"><SectionLabel id={`${id}-t`}>{label}</SectionLabel></div>
+    <div class="split__body"><slot /></div>
+  </div>
+</section>
+
+<style>
+  .split.top-xl { padding-top: var(--gap-xl); }
+  .split.top-l { padding-top: var(--gap-l); }
+  .split__label, .split__body { grid-column: 1 / -1; }
+  .split__label { margin-bottom: 16px; }
+  @media (min-width: 640px) {
+    .split__label { grid-column: 1 / span 2; margin: 6px 0 0; }
+    .split__body { grid-column: 3 / span 6; }
+  }
+  @media (min-width: 1024px) {
+    .split__label { grid-column: 1 / span 3; margin-top: 10px; }
+    .split__body { grid-column: 5 / span 7; }
+  }
+</style>

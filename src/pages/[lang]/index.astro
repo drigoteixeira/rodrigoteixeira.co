@@ -1,0 +1,79 @@
+---
+import Base from '../../layouts/Base.astro';
+import CaseCard from '../../components/CaseCard.astro';
+import SectionLabel from '../../components/SectionLabel.astro';
+import { t, langs, path, cases, caseNames, type Lang } from '../../lib/i18n';
+import { personLd, websiteLd, abs } from '../../lib/seo';
+
+export function getStaticPaths() {
+  return langs.map((lang) => ({ params: { lang } }));
+}
+const lang = Astro.params.lang as Lang;
+const c = t('home', lang);
+const title = lang === 'pt' ? 'Rodrigo Teixeira · Lead Product Design em São Paulo' : 'Rodrigo Teixeira · Lead Product Design in São Paulo';
+---
+<Base lang={lang} current="home" page="" title={title} description={`${c.hero} ${c.tagline}`} og={`/og/home-${lang}.png`} ogAlt={c.hero} ld={[websiteLd(), personLd(lang, c.tagline)]}>
+  <section class="hero container" aria-labelledby="hero-title">
+    <h1 id="hero-title" class="display-xl hero__title">{c.hero}</h1>
+    <div class="grid hero__facts">
+      <div class="hero__label"><SectionLabel tag="p">Rodrigo Teixeira</SectionLabel></div>
+      <div class="hero__body">
+        <div class="statement hero__lines">
+          <p>{c.f1}</p>
+          <p>{c.f2}</p>
+          <p class="muted-2">{c.f3}</p>
+        </div>
+        <p class="hero__tagline">{c.tagline}</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="work" class="cases container reveal" aria-labelledby="cases-title">
+    <h2 id="cases-title" class="cases__h"><SectionLabel tag="p">{c.cases}</SectionLabel></h2>
+    <div class="grid cases__grid">
+      {cases.map((k, i) => (
+        <CaseCard
+          class={i === 0 ? 'big' : 'half'}
+          href={path(lang, `work/${k.slug}` as any)}
+          name={caseNames[k.slug]}
+          year={k.year}
+          context={c[k.ctx]}
+          image={k.img}
+          lang={lang}
+          ar={i === 0 ? ['16 / 9', '4 / 3', '4 / 5'] : ['5 / 4', '5 / 4', '4 / 5']}
+          eager={i === 0}
+          sizes={i === 0 ? '(min-width: 1600px) 1520px, 100vw' : '(min-width: 1024px) 50vw, 100vw'}
+        />
+      ))}
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero { padding-top: 48px; }
+  .hero__title { max-width: 1245px; }
+  .hero__facts { margin-top: 48px; row-gap: 16px; align-items: start; }
+  .hero__label, .hero__body { grid-column: 1 / -1; }
+  .hero__lines { font-size: var(--text-statement); }
+  .muted-2 { color: var(--color-ink-2); }
+  .hero__tagline { margin-top: 32px; max-width: 56ch; font-size: var(--text-body-l); line-height: 1.5; color: var(--color-ink-2); }
+  .cases { padding-top: var(--gap-xl); padding-bottom: var(--gap-xl); }
+  .cases__h { margin-bottom: 40px; font-size: inherit; font-weight: inherit; }
+  .cases__grid { row-gap: 48px; }
+  .cases__grid :global(.case) { grid-column: 1 / -1; }
+  @media (min-width: 640px) {
+    .hero { padding-top: 64px; }
+    .hero__facts { margin-top: 64px; }
+    .hero__label { grid-column: 1 / span 2; margin-top: 6px; }
+    .hero__body { grid-column: 3 / span 6; }
+    .cases__grid { row-gap: 64px; }
+    .cases__grid :global(.case.half) { grid-column: span 4; }
+  }
+  @media (min-width: 1024px) {
+    .hero { padding-top: 96px; }
+    .hero__facts { margin-top: 80px; }
+    .hero__label { grid-column: 1 / span 3; margin-top: 10px; }
+    .hero__body { grid-column: 5 / span 7; }
+    .cases__grid :global(.case.half) { grid-column: span 6; }
+  }
+</style>

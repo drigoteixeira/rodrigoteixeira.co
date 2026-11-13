@@ -1,0 +1,29 @@
+---
+import MediaBlock from './MediaBlock.astro';
+import type { ImageKey, Lang } from '../lib/images';
+interface Props {
+  href: string; name: string; year: string; context: string;
+  image: ImageKey; lang: Lang; ar: [string, string, string];
+  eager?: boolean; sizes?: string; class?: string;
+}
+const { href, name, year, context, image, lang, ar, eager, sizes, class: cls = '' } = Astro.props;
+---
+<a class={`case ${cls}`} href={href}>
+  <MediaBlock image={image} lang={lang} ar={ar} eager={eager} sizes={sizes} />
+  <div class="case__cap">
+    <h3 class="case__name">{name}<span class="case__dot" aria-hidden="true"></span></h3>
+    <span class="case__year tabular">{year}</span>
+  </div>
+  <p class="case__ctx">{context}</p>
+</a>
+
+<style>
+  .case { display: block; }
+  .case__cap { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin-top: 12px; }
+  .case__name { display: flex; align-items: center; gap: 8px; font-size: var(--text-body); line-height: 1.6; font-weight: 400; }
+  .case__dot { width: 8px; height: 8px; border-radius: var(--radius-pill); background: var(--color-accent); opacity: 0; transition: opacity 200ms; }
+  .case__year { font-size: var(--text-body); line-height: 1.6; color: var(--color-muted); }
+  .case__ctx { margin-top: 4px; max-width: 62ch; font-size: var(--text-small); line-height: 1.5; color: var(--color-ink-2); }
+  @media (hover: hover) { .case:hover .case__dot { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .case__dot { transition: none; } }
+</style>

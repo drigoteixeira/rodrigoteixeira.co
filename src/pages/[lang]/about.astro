@@ -1,0 +1,89 @@
+---
+import Base from '../../layouts/Base.astro';
+import Split from '../../components/Split.astro';
+import SectionLabel from '../../components/SectionLabel.astro';
+import MediaBlock from '../../components/MediaBlock.astro';
+import { t, langs, path, type Lang } from '../../lib/i18n';
+import { personLd, breadcrumbLd, abs } from '../../lib/seo';
+
+export function getStaticPaths() {
+  return langs.map((lang) => ({ params: { lang } }));
+}
+const lang = Astro.params.lang as Lang;
+const c = t('about', lang);
+const title = lang === 'pt' ? 'Sobre Rodrigo Teixeira · Designer em São Paulo' : 'About Rodrigo Teixeira · Designer in São Paulo';
+const crumbs = breadcrumbLd([
+  { name: 'Rodrigo Teixeira', url: abs(path(lang, '')) },
+  { name: lang === 'pt' ? 'Sobre' : 'About', url: abs(path(lang, 'about')) },
+]);
+const values = [1, 2, 3, 4].map((n) => ({ title: c[`v${n}`], text: c[`d${n}`] }));
+---
+<Base lang={lang} current="about" page="about" title={title} description={`${c.statement} ${c.bio1}`} og="/og/about.png" ogAlt={title} ld={[{ ...personLd(lang, c.statement), mainEntityOfPage: abs(path(lang, 'about')) }, crumbs]}>
+  <section class="top container" aria-labelledby="about-title">
+    <h1 id="about-title" class="display-l">{c.title}</h1>
+  </section>
+
+  <section id="bio" class="bio container reveal" aria-labelledby="bio-t">
+    <div class="grid bio__grid">
+      <div class="bio__label"><SectionLabel id="bio-t">{c.s_bio}</SectionLabel></div>
+      <div class="bio__photo"><MediaBlock image="portrait" lang={lang} ar={['4 / 5', '4 / 5', '4 / 5']} pos="50% 25%" eager sizes="(min-width: 1024px) 25vw, 280px" /></div>
+      <div class="bio__text">
+        <p class="statement">{c.statement}</p>
+        <div class="prose">
+          <p class="body-l">{c.bio1}</p>
+          <p class="body-l">{c.bio2}</p>
+          <p class="body-l">{c.bio3}</p>
+          <p class="body-l">{c.bio4}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <Split id="lead" label={c.s_lead} top="l">
+    <p class="body-l">{c.leadership}</p>
+  </Split>
+
+  <section id="values" class="values container reveal" aria-labelledby="values-t">
+    <h2 id="values-t" class="values__h"><SectionLabel tag="p">{c.s_values}</SectionLabel></h2>
+    <ul class="values__list">
+      {values.map((v) => (
+        <li>
+          <h3 class="values__t">{v.title}</h3>
+          <p>{v.text}</p>
+        </li>
+      ))}
+    </ul>
+  </section>
+</Base>
+
+<style>
+  .top { padding-top: 48px; }
+  .bio { padding-top: var(--gap-l); }
+  .bio__grid { row-gap: 16px; }
+  .bio__label, .bio__photo, .bio__text { grid-column: 1 / -1; }
+  .bio__photo { max-width: 240px; margin-bottom: 8px; }
+  .bio__text .statement { margin-bottom: 24px; }
+  .values { padding-top: var(--gap-xl); padding-bottom: var(--gap-xl); }
+  .values__h { margin-bottom: 40px; font-size: inherit; font-weight: inherit; }
+  .values__list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr; gap: 32px var(--gutter); }
+  .values__list li { border-top: 1px solid var(--color-line); padding-top: 20px; }
+  .values__t { font-size: clamp(1.25rem, 1rem + .9vw, 1.625rem); line-height: 1.2; letter-spacing: -.02em; font-weight: 450; text-wrap: balance; }
+  .values__list p { margin-top: 12px; line-height: 1.6; color: var(--color-ink-2); }
+  @media (min-width: 640px) {
+    .top { padding-top: 64px; }
+    .bio__label { grid-column: 1 / span 2; grid-row: 1; margin-top: 6px; }
+    .bio__photo { grid-column: 3 / span 6; grid-row: 1; max-width: 280px; margin-bottom: 16px; }
+    .bio__text { grid-column: 3 / span 6; grid-row: 2; }
+    .bio__text .statement { margin-bottom: 27px; }
+    .values__list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (min-width: 1024px) {
+    .top { padding-top: 96px; }
+    .bio__label { grid-column: 1 / span 3; margin-top: 10px; margin-bottom: 24px; }
+    .bio__photo { grid-column: 1 / span 3; grid-row: 2; max-width: none; margin: 0; }
+    .bio__text { grid-column: 5 / span 7; grid-row: 1 / span 2; }
+    .bio__text .statement { margin-bottom: 48px; }
+    .values__h { margin-bottom: 56px; }
+    .values__list { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  }
+</style>

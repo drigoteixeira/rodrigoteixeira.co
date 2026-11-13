@@ -1,0 +1,91 @@
+---
+import Base from '../../../layouts/Base.astro';
+import CaseCard from '../../../components/CaseCard.astro';
+import SectionLabel from '../../../components/SectionLabel.astro';
+import { t, langs, path, cases, caseNames, type Lang } from '../../../lib/i18n';
+import { breadcrumbLd, abs } from '../../../lib/seo';
+
+export function getStaticPaths() {
+  return langs.map((lang) => ({ params: { lang } }));
+}
+const lang = Astro.params.lang as Lang;
+const c = t('work', lang);
+const title = lang === 'pt' ? 'Cases selecionados · Rodrigo Teixeira' : 'Selected work · Rodrigo Teixeira';
+const description = lang === 'pt'
+  ? 'Cases de Rodrigo Teixeira: Atlantic, Preferência à Vida e Riachuelo. Design de produto, discovery e estratégia para empresas e campanhas.'
+  : 'Work by Rodrigo Teixeira: Atlantic, Preferência à Vida and Riachuelo. Product design, discovery and strategy for companies and campaigns.';
+const crumbs = breadcrumbLd([
+  { name: 'Rodrigo Teixeira', url: abs(path(lang, '')) },
+  { name: 'Work', url: abs(path(lang, 'work')) },
+]);
+const others = [
+  { name: 'Porto Seguro', text: c.p1 },
+  { name: 'Consa', text: c.p2 },
+  { name: 'Educação SP', text: c.p3 },
+];
+---
+<Base lang={lang} current="work" page="work" title={title} description={description} og={`/og/work-${lang}.png`} ogAlt={title} ld={[crumbs]}>
+  <section class="top container" aria-labelledby="work-title">
+    <h1 id="work-title" class="display-l">{c.workTitle}</h1>
+  </section>
+
+  <section id="cases" class="cases container reveal" aria-labelledby="cases-title">
+    <h2 id="cases-title" class="cases__h"><SectionLabel tag="p">{c.cases}</SectionLabel></h2>
+    <div class="cases__list">
+      {cases.map((k, i) => (
+        <CaseCard
+          href={path(lang, `work/${k.slug}` as any)}
+          name={caseNames[k.slug]}
+          year={k.year}
+          context={c[k.ctx]}
+          image={k.img}
+          lang={lang}
+          ar={['16 / 9', '4 / 3', '4 / 5']}
+          eager={i === 0}
+        />
+      ))}
+    </div>
+  </section>
+
+  <section id="other" class="other container reveal" aria-labelledby="other-title">
+    <div class="grid">
+      <div class="other__label"><SectionLabel id="other-title">{c.other}</SectionLabel></div>
+      <ul class="other__list">
+        {others.map((o) => (
+          <li>
+            <h3 class="statement">{o.name}</h3>
+            <p>{o.text}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .top { padding-top: 48px; }
+  .cases { padding-top: var(--gap-l); }
+  .cases__h { margin-bottom: 32px; font-size: inherit; font-weight: inherit; }
+  .cases__list { display: flex; flex-direction: column; gap: 48px; }
+  .other { padding-top: var(--gap-xl); padding-bottom: var(--gap-xl); }
+  .other__label, .other__list { grid-column: 1 / -1; }
+  .other__label { margin-bottom: 16px; }
+  .other__list { list-style: none; margin: 0; padding: 0; }
+  .other__list li { border-top: 1px solid var(--color-line); padding: 24px 0; display: grid; gap: 12px var(--gutter); }
+  .other__list li:last-child { border-bottom: 1px solid var(--color-line); }
+  .other__list p { max-width: 62ch; line-height: 1.55; color: var(--color-ink-2); }
+  @media (min-width: 640px) {
+    .top { padding-top: 64px; }
+    .cases__list { gap: 64px; }
+    .other__label { grid-column: 1 / span 2; margin: 6px 0 0; }
+    .other__list { grid-column: 3 / span 6; }
+  }
+  @media (min-width: 1024px) {
+    .top { padding-top: 96px; }
+    .other__label { grid-column: 1 / span 3; margin-top: 10px; }
+    .other__list { grid-column: 5 / span 7; }
+    .other__list li { padding: 28px 0; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+    .other__list h3 { grid-column: 1 / span 3; }
+    .other__list p { grid-column: 4 / span 4; }
+  }
+</style>

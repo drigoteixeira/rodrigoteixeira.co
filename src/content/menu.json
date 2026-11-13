@@ -1,0 +1,28 @@
+{
+  "pt": {
+    "skip": "Ir para o conteúdo",
+    "close": "Fechar",
+    "closeLabel": "Fechar menu",
+    "email": "hello@rodrigoteixeira.co",
+    "states": "Estados dos links",
+    "sDefault": "Padrão",
+    "sHover": "Hover",
+    "sActive": "Ativo (página atual)",
+    "sFocus": "Foco do teclado",
+    "scrolled": "Após rolar 80px: fundo com 80% de opacidade e desfoque de 12px",
+    "behind": "Designer. Lidero times e entrego produtos de ponta a ponta."
+  },
+  "en": {
+    "skip": "Skip to content",
+    "close": "Close",
+    "closeLabel": "Close menu",
+    "email": "hello@rodrigoteixeira.co",
+    "states": "Link states",
+    "sDefault": "Default",
+    "sHover": "Hover",
+    "sActive": "Active (current page)",
+    "sFocus": "Keyboard focus",
+    "scrolled": "After scrolling 80px: 80% opaque background with 12px blur",
+    "behind": "Designer. Leading teams and shipping products end to end."
+  }
+}

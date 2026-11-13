@@ -1,0 +1,45 @@
+---
+// Imagem com cantos arredondados e proporção diferente para cada tamanho de tela.
+import { Picture } from 'astro:assets';
+import { images, type ImageKey, type Lang } from '../lib/images';
+
+interface Props {
+  image: ImageKey;
+  lang: Lang;
+  /** Proporções [desktop, tablet, mobile], por exemplo ['16 / 9', '4 / 3', '4 / 5'] */
+  ar: [string, string, string];
+  fit?: 'cover' | 'contain';
+  pos?: string;
+  eager?: boolean;
+  sizes?: string;
+}
+const { image, lang, ar, fit = 'cover', pos = 'center', eager = false, sizes = '(min-width: 1600px) 1520px, 100vw' } = Astro.props;
+const img = images[image];
+---
+<div class="media" style={`--ar-d:${ar[0]};--ar-t:${ar[1]};--ar-m:${ar[2]};--fit:${fit};--pos:${pos}`}>
+  <div class="media__in">
+    <Picture
+      src={img.src}
+      alt={img.alt[lang]}
+      widths={[640, 960, 1440, 2000]}
+      sizes={sizes}
+      formats={['avif', 'webp']}
+      loading={eager ? 'eager' : 'lazy'}
+      fetchpriority={eager ? 'high' : 'auto'}
+      class="media__img"
+    />
+  </div>
+</div>
+
+<style>
+  .media { border-radius: var(--radius-media); overflow: hidden; background: var(--color-surface); }
+  .media__in { position: relative; aspect-ratio: var(--ar-m); background: var(--color-surface); transition: transform 500ms cubic-bezier(.2,.7,.2,1); }
+  .media :global(.media__img), .media :global(picture) { display: block; width: 100%; height: 100%; }
+  .media :global(.media__img) { position: absolute; inset: 0; object-fit: var(--fit); object-position: var(--pos); }
+  @media (min-width: 640px) { .media__in { aspect-ratio: var(--ar-t); } }
+  @media (min-width: 1024px) { .media__in { aspect-ratio: var(--ar-d); } }
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    :global(.case:hover) .media__in, .media:hover .media__in { transform: scale(1.02); }
+  }
+  @media (prefers-reduced-motion: reduce) { .media__in { transition: none; } }
+</style>

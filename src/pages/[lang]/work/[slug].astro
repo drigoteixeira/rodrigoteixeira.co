@@ -1,0 +1,145 @@
+---
+import Base from '../../../layouts/Base.astro';
+import Split from '../../../components/Split.astro';
+import MediaBlock from '../../../components/MediaBlock.astro';
+import MetaStrip from '../../../components/MetaStrip.astro';
+import NextCase from '../../../components/NextCase.astro';
+import { t, langs, path, caseNames, type Lang, type PageKey } from '../../../lib/i18n';
+import { caseDefs } from '../../../lib/cases';
+import { caseLd, breadcrumbLd, abs } from '../../../lib/seo';
+
+export function getStaticPaths() {
+  return langs.flatMap((lang) => caseDefs.map((def) => ({ params: { lang, slug: def.slug }, props: { def } })));
+}
+const lang = Astro.params.lang as Lang;
+const { def } = Astro.props;
+const c = t(def.slug as PageKey, lang);
+const name = caseNames[def.slug];
+const title = lang === 'pt' ? `${name} · Case de design · Rodrigo Teixeira` : `${name} · Design case · Rodrigo Teixeira`;
+const description = lang === 'pt'
+  ? `${c.a_lead} Case de ${c.v_role}, ${c.v_year}, por Rodrigo Teixeira.`
+  : `${c.a_lead} ${c.v_role} case, ${c.v_year}, by Rodrigo Teixeira.`;
+const pageUrl = abs(path(lang, `work/${def.slug}` as any));
+const og = `/og/case-${def.slug}.png`;
+const ld = [
+  caseLd({ lang, name, description, url: pageUrl, year: c.v_year, image: abs(og) }),
+  breadcrumbLd([
+    { name: 'Rodrigo Teixeira', url: abs(path(lang, '')) },
+    { name: 'Work', url: abs(path(lang, 'work')) },
+    { name, url: pageUrl },
+  ]),
+];
+const meta = def.meta.map((k) => ({ label: c[`m_${k}`], value: c[`v_${k}`] }));
+---
+<Base lang={lang} current="work" page={`work/${def.slug}` as any} title={title} description={description} og={og} ogAlt={`${name}: ${c.a_lead}`} ld={ld}>
+  <section class="head container" aria-labelledby="case-title">
+    <h1 id="case-title" class="display-l">{caseNames[def.slug]}</h1>
+    <p class="statement lead">{c.a_lead}</p>
+  </section>
+
+  <MetaStrip items={meta} />
+
+  <section aria-label="Cover" class="container cover">
+    <MediaBlock image={def.cover} lang={lang} ar={['16 / 9', '4 / 3', '4 / 5']} eager />
+  </section>
+
+  {def.sections.map((s, i) => {
+    const first = i === 0;
+    if (s.kind === 'text') {
+      return (
+        <Split id={s.id} label={c[s.label]} top={first || s.id === 'result' ? 'xl' : 'l'}>
+          {s.numbers && (
+            <div class="numbers">
+              {s.numbers.map((n) => (
+                <div>
+                  <p class="display-l tabular">{c[n.n]}</p>
+                  <p class="small num-l">{c[n.l]}</p>
+                </div>
+              ))}
+            </div>
+          )}
+          <div class="prose">
+            {s.blocks.map((b) => {
+              if ('p' in b) return <p class="body-l">{c[b.p]}</p>;
+              if ('ol' in b) return <ol>{b.ol.map((k) => <li>{c[k]}</li>)}</ol>;
+              return <ul>{b.ul.map((k) => <li>{c[k]}</li>)}</ul>;
+            })}
+          </div>
+        </Split>
+      );
+    }
+    if (s.kind === 'pair') {
+      return (
+        <section class="container gallery reveal">
+          <div class="pair">
+            <MediaBlock image={s.a} lang={lang} ar={s.ar} />
+            <MediaBlock image={s.b} lang={lang} ar={s.ar} />
+          </div>
+        </section>
+      );
+    }
+    if (s.kind === 'riaBench') {
+      return (
+        <section class="container gallery reveal">
+          <MediaBlock image="riaBench" lang={lang} ar={['2.2 / 1', '2.2 / 1', '16 / 9']} />
+        </section>
+      );
+    }
+    if (s.kind === 'riaWorkshop') {
+      return (
+        <section class="container gallery gallery--tight reveal">
+          <div class="pair">
+            <MediaBlock image="riaW1" lang={lang} ar={['4 / 3', '4 / 3', '4 / 5']} />
+            <MediaBlock image="riaW2" lang={lang} ar={['4 / 3', '4 / 3', '4 / 5']} />
+          </div>
+        </section>
+      );
+    }
+    if (s.kind === 'riaMatrix') {
+      return (
+        <section class="container gallery reveal">
+          <div class="third">
+            <MediaBlock image="riaMatrix" lang={lang} ar={['3 / 4', '3 / 4', '3 / 4']} />
+            <MediaBlock image="riaStruct" lang={lang} ar={['3 / 2', '3 / 2', '3 / 2']} fit="contain" />
+          </div>
+        </section>
+      );
+    }
+    return (
+      <section class="container gallery gallery--tight reveal">
+        <MediaBlock image="riaWire" lang={lang} ar={['16 / 9', '4 / 3', '1 / 1']} fit="contain" />
+      </section>
+    );
+  })}
+
+  <NextCase
+    href={path(lang, `work/${def.next}` as any)}
+    label={c.next}
+    name={caseNames[def.next]}
+    year={t(def.slug as PageKey, lang)[`nextYear`]}
+  />
+</Base>
+
+<style>
+  .head { padding-top: 48px; }
+  .lead { margin-top: 32px; max-width: 36ch; }
+  .cover { padding-top: 32px; }
+  .gallery { padding-top: var(--gap-xl); }
+  .gallery--tight { padding-top: var(--gap-xl); }
+  .pair { display: grid; grid-template-columns: 1fr; gap: var(--gutter); }
+  .third { display: grid; grid-template-columns: 1fr; gap: var(--gutter); align-items: start; }
+  .numbers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--gutter); row-gap: 28px; margin-bottom: 48px; }
+  .num-l { margin-top: 12px; color: var(--color-ink-2); }
+  @media (min-width: 640px) {
+    .head { padding-top: 64px; }
+    .lead { margin-top: 40px; }
+    .pair { grid-template-columns: 1fr 1fr; }
+    .third { grid-template-columns: 1fr 2fr; }
+    .numbers { margin-bottom: 56px; }
+  }
+  @media (min-width: 1024px) {
+    .head { padding-top: 96px; }
+    .lead { margin-top: 48px; }
+    .numbers { margin-bottom: 72px; }
+  }
+</style>

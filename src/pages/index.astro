@@ -1,0 +1,24 @@
+---
+// Página raiz: leva cada visitante para a versão no idioma do navegador (PT ou EN).
+---
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rodrigo Teixeira</title>
+    <meta http-equiv="refresh" content="0; url=/pt/" />
+    <link rel="canonical" href="https://rodrigoteixeira.co/pt/" />
+    <link rel="alternate" hreflang="pt-BR" href="https://rodrigoteixeira.co/pt/" />
+    <link rel="alternate" hreflang="en" href="https://rodrigoteixeira.co/en/" />
+    <link rel="alternate" hreflang="x-default" href="https://rodrigoteixeira.co/pt/" />
+    <script is:inline>
+      var l = (navigator.language || 'pt').toLowerCase();
+      if (l.indexOf('pt') !== 0) location.replace('/en/');
+      else location.replace('/pt/');
+    </script>
+  </head>
+  <body>
+    <p><a href="/pt/">Português</a> · <a href="/en/">English</a></p>
+  </body>
+</html>

@@ -1,0 +1,52 @@
+/* Tokens do design.md v2. Mexa aqui para mudar cores, fontes e espaçamentos do site inteiro. */
+:root {
+  /* Cores */
+  --color-bg: #faf8f5;
+  --color-surface: #f1eee9;
+  --color-line: #e3dfd8;
+  --color-ink: #141414;
+  --color-ink-2: #4a4742;
+  --color-muted: #6b6760;
+  --color-accent: #d6104f;
+  --color-accent-soft: #ff3d7f;
+  --color-dark: #0e0e0e;
+  --color-dark-ink: #f4f1ec;
+  --color-dark-muted: #a19d96;
+
+  /* Fontes */
+  --font-display: "Bricolage Grotesque Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-text: "Inter Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Escala tipográfica (fluida) */
+  --text-display-xl: clamp(2.75rem, 1.2rem + 6.2vw, 7rem);
+  --text-display-l: clamp(2rem, 1rem + 3.6vw, 4.5rem);
+  --text-statement: clamp(1.375rem, 1rem + 1.2vw, 2rem);
+  --text-body-l: 1.125rem;
+  --text-body: 1rem;
+  --text-small: 0.875rem;
+  --text-label: 0.8125rem;
+
+  /* Espaçamento (base de 4px) */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+  --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px;
+  --space-9: 96px; --space-10: 128px;
+  --gap-xl: clamp(64px, 10vw, 144px); /* entre blocos grandes */
+  --gap-l: clamp(48px, 7.5vw, 108px); /* entre seções de texto */
+
+  /* Forma */
+  --radius-media: 12px;
+  --radius-pill: 999px;
+
+  /* Grade */
+  --cols: 4;
+  --gutter: 16px;
+  --margin: 16px;
+  --header-h: 60px;
+}
+
+@media (min-width: 640px) {
+  :root { --cols: 8; --gutter: 20px; --margin: 24px; --radius-media: 16px; }
+}
+@media (min-width: 1024px) {
+  :root { --cols: 12; --gutter: 24px; --margin: 40px; --radius-media: 20px; --header-h: 72px; }
+}

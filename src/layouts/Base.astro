@@ -1,0 +1,115 @@
+---
+import '@fontsource-variable/bricolage-grotesque';
+import '@fontsource-variable/inter';
+import '../styles/global.css';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import { common, htmlLang, path, type Lang } from '../lib/i18n';
+import { abs, clip, ogLocale, SITE_NAME, graph } from '../lib/seo';
+
+interface Props {
+  lang: Lang;
+  title: string;
+  description: string;
+  current: 'home' | 'work' | 'about';
+  page: '' | 'work' | 'about' | 'work/atlantic' | 'work/preferencia' | 'work/riachuelo';
+  /** Imagem de compartilhamento (1200×630), ex.: '/og/home-pt.png' */
+  og?: string;
+  ogAlt?: string;
+  /** Dados estruturados (JSON-LD): lista de blocos schema.org */
+  ld?: object[];
+  /** Páginas que não devem aparecer no Google (ex.: erro 404) */
+  noindex?: boolean;
+}
+const { lang, title, description, current, page, og = `/og/home-${lang}.png`, ogAlt = SITE_NAME, ld = [], noindex = false } = Astro.props;
+const c = common(lang);
+const desc = clip(description);
+const url = abs(path(lang, page));
+const other = lang === 'pt' ? 'en' : 'pt';
+---
+<!doctype html>
+<html lang={htmlLang[lang]}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={desc} />
+    {noindex ? (
+      <meta name="robots" content="noindex, follow" />
+    ) : (
+      <>
+        <meta name="robots" content="index, follow, max-image-preview:large" />
+        <link rel="canonical" href={url} />
+        <link rel="alternate" hreflang="pt-BR" href={abs(path('pt', page))} />
+        <link rel="alternate" hreflang="en" href={abs(path('en', page))} />
+        <link rel="alternate" hreflang="x-default" href={abs(path('pt', page))} />
+      </>
+    )}
+    <meta name="author" content={SITE_NAME} />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:type" content={page.startsWith('work/') ? 'article' : 'website'} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={desc} />
+    <meta property="og:url" content={url} />
+    <meta property="og:locale" content={ogLocale[lang]} />
+    <meta property="og:locale:alternate" content={ogLocale[other]} />
+    <meta property="og:image" content={abs(og)} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={ogAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={desc} />
+    <meta name="twitter:image" content={abs(og)} />
+    <meta name="twitter:image:alt" content={ogAlt} />
+    <meta name="theme-color" content="#faf8f5" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+    {ld.length > 0 && <script type="application/ld+json" set:html={JSON.stringify(graph(ld))} />}
+    <script is:inline>document.documentElement.classList.add('js');</script>
+  </head>
+  <body>
+    <a class="skip" href="#conteudo">{c.skip}</a>
+    <Nav lang={lang} current={current} page={page} />
+    <main id="conteudo"><slot /></main>
+    <Footer lang={lang} />
+
+    <script>
+      // Cabeçalho com fundo translúcido depois de rolar 80px
+      const header = document.querySelector('[data-header]');
+      const onScroll = () => header?.classList.toggle('is-scrolled', window.scrollY > 80);
+      onScroll();
+      window.addEventListener('scroll', onScroll, { passive: true });
+
+      // Menu em tela cheia (tablet e mobile)
+      const menu = document.querySelector<HTMLElement>('[data-menu]');
+      const openBtn = document.querySelector<HTMLButtonElement>('[data-menu-open]');
+      const closeBtn = document.querySelector<HTMLButtonElement>('[data-menu-close]');
+      const setMenu = (open: boolean) => {
+        if (!menu || !openBtn) return;
+        menu.hidden = !open;
+        openBtn.setAttribute('aria-expanded', String(open));
+        document.body.style.overflow = open ? 'hidden' : '';
+        (open ? closeBtn : openBtn)?.focus();
+      };
+      openBtn?.addEventListener('click', () => setMenu(true));
+      closeBtn?.addEventListener('click', () => setMenu(false));
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && menu && !menu.hidden) setMenu(false); });
+      window.matchMedia('(min-width: 1024px)').addEventListener('change', (m) => { if (m.matches && menu && !menu.hidden) setMenu(false); });
+
+      // Entrada suave das seções (só com JavaScript e sem preferência por menos movimento)
+      const items = document.querySelectorAll('.reveal');
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach((en) => { if (en.isIntersecting) { en.target.classList.add('is-in'); io.unobserve(en.target); } });
+        }, { rootMargin: '0px 0px -8% 0px' });
+        items.forEach((el) => io.observe(el));
+      } else {
+        items.forEach((el) => el.classList.add('is-in'));
+      }
+    </script>
+  </body>
+</html>
