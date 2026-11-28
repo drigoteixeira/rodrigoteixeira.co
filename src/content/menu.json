@@ -10,7 +10,10 @@
     "sActive": "Ativo (página atual)",
     "sFocus": "Foco do teclado",
     "scrolled": "Após rolar 80px: fundo com 80% de opacidade e desfoque de 12px",
-    "behind": "Designer. Lidero times e entrego produtos de ponta a ponta."
+    "behind": "Designer. Lidero times e entrego produtos de ponta a ponta.",
+    "copy": "Copiar e-mail",
+    "copied": "Copiado",
+    "caseOf": "Case"
   },
   "en": {
     "skip": "Skip to content",
@@ -23,6 +26,9 @@
     "sActive": "Active (current page)",
     "sFocus": "Keyboard focus",
     "scrolled": "After scrolling 80px: 80% opaque background with 12px blur",
-    "behind": "Designer. Leading teams and shipping products end to end."
+    "behind": "Designer. Leading teams and shipping products end to end.",
+    "copy": "Copy email",
+    "copied": "Copied",
+    "caseOf": "Case"
   }
 }

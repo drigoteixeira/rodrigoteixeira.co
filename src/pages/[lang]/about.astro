@@ -3,6 +3,7 @@ import Base from '../../layouts/Base.astro';
 import Split from '../../components/Split.astro';
 import SectionLabel from '../../components/SectionLabel.astro';
 import MediaBlock from '../../components/MediaBlock.astro';
+import Words from '../../components/Words.astro';
 import { t, langs, path, type Lang } from '../../lib/i18n';
 import { personLd, breadcrumbLd, abs } from '../../lib/seo';
 
@@ -20,7 +21,7 @@ const values = [1, 2, 3, 4].map((n) => ({ title: c[`v${n}`], text: c[`d${n}`] })
 ---
 <Base lang={lang} current="about" page="about" title={title} description={`${c.statement} ${c.bio1}`} og="/og/about.png" ogAlt={title} ld={[{ ...personLd(lang, c.statement), mainEntityOfPage: abs(path(lang, 'about')) }, crumbs]}>
   <section class="top container" aria-labelledby="about-title">
-    <h1 id="about-title" class="display-l">{c.title}</h1>
+    <h1 id="about-title" class="display-xl about__title"><Words text={c.title} /></h1>
   </section>
 
   <section id="bio" class="bio container reveal" aria-labelledby="bio-t">
@@ -57,7 +58,8 @@ const values = [1, 2, 3, 4].map((n) => ({ title: c[`v${n}`], text: c[`d${n}`] })
 </Base>
 
 <style>
-  .top { padding-top: 48px; }
+  .top { padding-top: 56px; }
+  .about__title { max-width: 14ch; }
   .bio { padding-top: var(--gap-l); }
   .bio__grid { row-gap: 16px; }
   .bio__label, .bio__photo, .bio__text { grid-column: 1 / -1; }

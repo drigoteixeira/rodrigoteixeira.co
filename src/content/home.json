@@ -15,7 +15,8 @@
     "c3": "Discovery de produto para um novo app mobile.",
     "ctaTitle": "Vamos trabalhar juntos",
     "ctaBody": "Estou disponível de forma seletiva para projetos estratégicos de design. Se você está trabalhando em algo complexo e relevante, adoraria ouvir sobre isso.",
-    "navigate": "Navegue"
+    "navigate": "Navegue",
+    "now": "Hoje"
   },
   "en": {
     "skip": "Skip to content",
@@ -33,6 +34,7 @@
     "c3": "Product discovery for a new mobile app.",
     "ctaTitle": "Let's work together",
     "ctaBody": "I'm selectively available for strategic design engagements. If you're working on something complex and meaningful, I'd love to hear about it.",
-    "navigate": "Navigate"
+    "navigate": "Navigate",
+    "now": "Now"
   }
 }

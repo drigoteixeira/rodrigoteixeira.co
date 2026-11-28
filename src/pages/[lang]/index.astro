@@ -2,8 +2,9 @@
 import Base from '../../layouts/Base.astro';
 import CaseCard from '../../components/CaseCard.astro';
 import SectionLabel from '../../components/SectionLabel.astro';
+import Words from '../../components/Words.astro';
 import { t, langs, path, cases, caseNames, type Lang } from '../../lib/i18n';
-import { personLd, websiteLd, abs } from '../../lib/seo';
+import { personLd, websiteLd } from '../../lib/seo';
 
 export function getStaticPaths() {
   return langs.map((lang) => ({ params: { lang } }));
@@ -11,36 +12,49 @@ export function getStaticPaths() {
 const lang = Astro.params.lang as Lang;
 const c = t('home', lang);
 const title = lang === 'pt' ? 'Rodrigo Teixeira · Lead Product Design em São Paulo' : 'Rodrigo Teixeira · Lead Product Design in São Paulo';
+const years = cases.map((k) => Number(k.year));
+const range = `${Math.min(...years)}—${Math.max(...years)}`;
+const pad = (n: number) => String(n).padStart(2, '0');
 ---
 <Base lang={lang} current="home" page="" title={title} description={`${c.hero} ${c.tagline}`} og={`/og/home-${lang}.png`} ogAlt={c.hero} ld={[websiteLd(), personLd(lang, c.tagline)]}>
+  <!--
+    Entrada da Home (uma vez por visita):
+    título = protagonista (palavras sobem, 0–480ms) · fatos e tagline = apoio (sobem 10px, 420–620ms)
+    · rótulos = decoração (só opacidade). Os cases não entram no carregamento: revelam ao rolar.
+  -->
   <section class="hero container" aria-labelledby="hero-title">
-    <h1 id="hero-title" class="display-xl hero__title">{c.hero}</h1>
+    <h1 id="hero-title" class="display-xl hero__title"><Words text={c.hero} muteFrom={1} spread={480} /></h1>
+
     <div class="grid hero__facts">
-      <div class="hero__label"><SectionLabel tag="p">Rodrigo Teixeira</SectionLabel></div>
-      <div class="hero__body">
-        <div class="statement hero__lines">
-          <p>{c.f1}</p>
-          <p>{c.f2}</p>
-          <p class="muted-2">{c.f3}</p>
-        </div>
-        <p class="hero__tagline">{c.tagline}</p>
-      </div>
+      <div class="hero__label intro-fade" style="--d:500ms"><SectionLabel tag="p">{c.now}</SectionLabel></div>
+      <ul class="hero__lines statement">
+        <li class="intro" style="--d:420ms">{c.f1}</li>
+        <li class="intro" style="--d:500ms">{c.f2}</li>
+        <li class="intro muted-2" style="--d:560ms">{c.f3}</li>
+      </ul>
+      <p class="hero__tagline intro" style="--d:620ms">{c.tagline}</p>
     </div>
   </section>
 
-  <section id="work" class="cases container reveal" aria-labelledby="cases-title">
-    <h2 id="cases-title" class="cases__h"><SectionLabel tag="p">{c.cases}</SectionLabel></h2>
+  <section id="work" class="cases container" aria-labelledby="cases-title">
+    <div class="cases__head reveal">
+      <h2 id="cases-title" class="cases__h"><SectionLabel tag="p">{c.cases}</SectionLabel></h2>
+      <p class="mono-label muted tabular">({pad(cases.length)}) · {range}</p>
+    </div>
+    <div class="rule cases__rule"></div>
     <div class="grid cases__grid">
       {cases.map((k, i) => (
         <CaseCard
-          class={i === 0 ? 'big' : 'half'}
+          class={i === 0 ? 'big' : `half half-${i}`}
           href={path(lang, `work/${k.slug}` as any)}
           name={caseNames[k.slug]}
           year={k.year}
           context={c[k.ctx]}
           image={k.img}
           lang={lang}
-          ar={i === 0 ? ['16 / 9', '4 / 3', '4 / 5'] : ['5 / 4', '5 / 4', '4 / 5']}
+          index={pad(i + 1)}
+          vt={`case-${k.slug}`}
+          ar={i === 0 ? ['16 / 9', '4 / 3', '4 / 5'] : ['4 / 5', '4 / 5', '4 / 5']}
           eager={i === 0}
           sizes={i === 0 ? '(min-width: 1600px) 1520px, 100vw' : '(min-width: 1024px) 50vw, 100vw'}
         />
@@ -50,30 +64,38 @@ const title = lang === 'pt' ? 'Rodrigo Teixeira · Lead Product Design em São P
 </Base>
 
 <style>
-  .hero { padding-top: 48px; }
-  .hero__title { max-width: 1245px; }
-  .hero__facts { margin-top: 48px; row-gap: 16px; align-items: start; }
-  .hero__label, .hero__body { grid-column: 1 / -1; }
-  .hero__lines { font-size: var(--text-statement); }
-  .muted-2 { color: var(--color-ink-2); }
-  .hero__tagline { margin-top: 32px; max-width: 56ch; font-size: var(--text-body-l); line-height: 1.5; color: var(--color-ink-2); }
-  .cases { padding-top: var(--gap-xl); padding-bottom: var(--gap-xl); }
-  .cases__h { margin-bottom: 40px; font-size: inherit; font-weight: inherit; }
-  .cases__grid { row-gap: 48px; }
+  .hero { padding-top: 32px; padding-bottom: var(--gap-l); }
+  .hero__title { margin-top: clamp(24px, 5vw, 80px); max-width: 15ch; }
+  .hero__facts { margin-top: clamp(48px, 6vw, 96px); row-gap: 20px; align-items: start; }
+  .hero__label, .hero__lines, .hero__tagline { grid-column: 1 / -1; }
+  .hero__lines { list-style: none; margin: 0; padding: 0; }
+  .muted-2 { color: var(--color-muted); }
+  .hero__tagline { max-width: 52ch; font-size: var(--text-body-l); line-height: 1.6; color: var(--color-ink-2); text-wrap: pretty; }
+
+  .cases { padding-bottom: var(--gap-xl); }
+  .cases__head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding-bottom: 20px; }
+  .cases__h { font-size: inherit; font-weight: inherit; }
+  .cases__rule { margin-bottom: 32px; }
+  .cases__grid { row-gap: 56px; }
   .cases__grid :global(.case) { grid-column: 1 / -1; }
+
   @media (min-width: 640px) {
-    .hero { padding-top: 64px; }
-    .hero__facts { margin-top: 64px; }
-    .hero__label { grid-column: 1 / span 2; margin-top: 6px; }
-    .hero__body { grid-column: 3 / span 6; }
-    .cases__grid { row-gap: 64px; }
+    .hero { padding-top: 40px; }
+    .hero__label { grid-column: 1 / span 2; margin-top: 8px; }
+    .hero__lines { grid-column: 3 / span 6; }
+    .hero__tagline { grid-column: 3 / span 6; margin-top: 12px; }
+    .cases__grid { row-gap: 72px; }
     .cases__grid :global(.case.half) { grid-column: span 4; }
+    .cases__grid :global(.case.half-2) { margin-top: 96px; }
   }
   @media (min-width: 1024px) {
-    .hero { padding-top: 96px; }
-    .hero__facts { margin-top: 80px; }
-    .hero__label { grid-column: 1 / span 3; margin-top: 10px; }
-    .hero__body { grid-column: 5 / span 7; }
-    .cases__grid :global(.case.half) { grid-column: span 6; }
+    .hero { padding-top: 48px; }
+    .hero__label { grid-column: 1 / span 3; margin-top: 12px; }
+    .hero__lines { grid-column: 5 / span 5; }
+    .hero__tagline { grid-column: 10 / span 3; margin-top: 10px; font-size: var(--text-body); color: var(--color-muted); }
+    .cases__rule { margin-bottom: 40px; }
+    .cases__grid { row-gap: 96px; }
+    .cases__grid :global(.case.half-1) { grid-column: 1 / span 5; }
+    .cases__grid :global(.case.half-2) { grid-column: 7 / span 6; margin-top: 192px; }
   }
 </style>

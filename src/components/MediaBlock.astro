@@ -1,5 +1,7 @@
 ---
 // Imagem com cantos arredondados e proporção diferente para cada tamanho de tela.
+// Imagens fora da primeira dobra se revelam de baixo para cima ao entrar na tela
+// (clip-path), enquanto a foto assenta de 1.06 para 1: uma só gesto, uma vez só.
 import { Picture } from 'astro:assets';
 import { images, type ImageKey, type Lang } from '../lib/images';
 
@@ -12,11 +14,19 @@ interface Props {
   pos?: string;
   eager?: boolean;
   sizes?: string;
+  /** Nome para a transição entre páginas (a mesma imagem em duas páginas) */
+  vt?: string;
+  /** Atraso da revelação, em ms (para imagens lado a lado) */
+  delay?: number;
 }
-const { image, lang, ar, fit = 'cover', pos = 'center', eager = false, sizes = '(min-width: 1600px) 1520px, 100vw' } = Astro.props;
+const { image, lang, ar, fit = 'cover', pos = 'center', eager = false, sizes = '(min-width: 1600px) 1520px, 100vw', vt, delay = 0 } = Astro.props;
 const img = images[image];
+const style = [
+  `--ar-d:${ar[0]}`, `--ar-t:${ar[1]}`, `--ar-m:${ar[2]}`, `--fit:${fit}`, `--pos:${pos}`, `--d:${delay}ms`,
+  vt ? `view-transition-name:${vt}` : '',
+].filter(Boolean).join(';');
 ---
-<div class="media" style={`--ar-d:${ar[0]};--ar-t:${ar[1]};--ar-m:${ar[2]};--fit:${fit};--pos:${pos}`}>
+<div class:list={['media', { 'reveal-media': !eager }]} style={style}>
   <div class="media__in">
     <Picture
       src={img.src}
@@ -32,14 +42,35 @@ const img = images[image];
 </div>
 
 <style>
-  .media { border-radius: var(--radius-media); overflow: hidden; background: var(--color-surface); }
-  .media__in { position: relative; aspect-ratio: var(--ar-m); background: var(--color-surface); transition: transform 500ms cubic-bezier(.2,.7,.2,1); }
+  .media { position: relative; border-radius: var(--radius-media); overflow: hidden; background: var(--color-surface); isolation: isolate; }
+  .media__in { position: relative; aspect-ratio: var(--ar-m); background: var(--color-surface); }
   .media :global(.media__img), .media :global(picture) { display: block; width: 100%; height: 100%; }
   .media :global(.media__img) { position: absolute; inset: 0; object-fit: var(--fit); object-position: var(--pos); }
   @media (min-width: 640px) { .media__in { aspect-ratio: var(--ar-t); } }
   @media (min-width: 1024px) { .media__in { aspect-ratio: var(--ar-d); } }
-  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
-    :global(.case:hover) .media__in, .media:hover .media__in { transform: scale(1.02); }
+
+  /* Hover: aproximação lenta e curta, só em mouse */
+  .media__in { transition: transform 900ms var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    :global(.case:hover) .media__in { transform: scale(1.025); }
   }
-  @media (prefers-reduced-motion: reduce) { .media__in { transition: none; } }
+
+  /* Revelação ao rolar */
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.js) .reveal-media {
+      clip-path: inset(100% 0 0 0 round var(--radius-media));
+      transition: clip-path var(--dur-reveal) var(--ease-in-out) var(--d);
+    }
+    :global(.js) .reveal-media :global(.media__img) {
+      transform: scale(1.06);
+      transition: transform 1400ms var(--ease-out) var(--d);
+    }
+    :global(.js) .reveal-media:global(.is-in) { clip-path: inset(0 0 0 0 round var(--radius-media)); }
+    :global(.js) .reveal-media:global(.is-in) :global(.media__img) { transform: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :global(.js) .reveal-media { opacity: 0; transition: opacity 400ms ease; }
+    :global(.js) .reveal-media:global(.is-in) { opacity: 1; }
+    .media__in { transition: none; }
+  }
 </style>

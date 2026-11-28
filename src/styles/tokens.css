@@ -33,6 +33,13 @@
   --gap-xl: clamp(64px, 10vw, 144px); /* entre blocos grandes */
   --gap-l: clamp(48px, 7.5vw, 108px); /* entre seções de texto */
 
+  /* Movimento (curvas fortes: as padrão do CSS são fracas demais) */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);       /* entradas e respostas */
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);   /* coisas que se movem na tela */
+  --dur-press: 160ms;
+  --dur-hover: 240ms;
+  --dur-reveal: 900ms;
+
   /* Forma */
   --radius-media: 12px;
   --radius-pill: 999px;

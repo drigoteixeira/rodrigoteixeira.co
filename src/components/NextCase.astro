@@ -1,22 +1,37 @@
 ---
-interface Props { href: string; label: string; name: string; year: string }
-const { href, label, name, year } = Astro.props;
+// Fim do case: um convite grande para o próximo, com a imagem dele.
+// A imagem usa o mesmo nome de transição da capa, então ao clicar ela "vira" a capa do próximo case.
+import MediaBlock from './MediaBlock.astro';
+import type { ImageKey, Lang } from '../lib/images';
+interface Props { href: string; label: string; name: string; year: string; image: ImageKey; lang: Lang; vt?: string; index?: string }
+const { href, label, name, year, image, lang, vt, index } = Astro.props;
 ---
 <section aria-labelledby="next-t" class="container next">
   <a class="case next__link" href={href}>
-    <h2 id="next-t" class="label"><span class="dot" aria-hidden="true"></span>{label}</h2>
-    <div class="next__row">
-      <span class="display-l">{name} <span aria-hidden="true">→</span></span>
-      <span class="next__year tabular">{year}</span>
+    <div class="next__text reveal">
+      <h2 id="next-t" class="next__label"><span class="dot" aria-hidden="true"></span>{label}</h2>
+      <p class="next__name display-xl">{name}<span class="next__arrow" aria-hidden="true">→</span></p>
+      <p class="next__meta mono-label muted">{index && <span>{index}</span>}<span>{year}</span></p>
+    </div>
+    <div class="next__media">
+      <MediaBlock image={image} lang={lang} ar={['4 / 3', '4 / 3', '4 / 3']} vt={vt} sizes="(min-width: 1024px) 34vw, 100vw" />
     </div>
   </a>
 </section>
 
 <style>
-  .next { padding-block: var(--gap-xl); }
-  .next__link { display: block; border-top: 1px solid var(--color-line); padding-top: 28px; }
-  .label { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; font-size: var(--text-label); line-height: 1.3; font-weight: 500; letter-spacing: .01em; }
+  .next { padding-top: var(--gap-xl); padding-bottom: var(--gap-l); }
+  .next__link { display: grid; gap: 28px; border-top: 1px solid var(--color-line); padding-top: 28px; }
+  .next__label { display: flex; align-items: center; gap: 8px; margin-bottom: 24px; font-size: var(--text-label); line-height: 1.3; font-weight: 500; letter-spacing: .01em; }
   .dot { flex: none; width: 8px; height: 8px; border-radius: var(--radius-pill); background: var(--color-accent); }
-  .next__row { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
-  .next__year { line-height: 1.6; color: var(--color-muted); }
+  .next__name { max-width: 12ch; }
+  .next__arrow { display: inline-block; margin-left: .25em; color: var(--color-accent); font-family: var(--font-text); font-weight: 300; font-size: .6em; transition: transform var(--dur-hover) var(--ease-out); }
+  .next__meta { margin-top: 20px; display: flex; gap: 16px; }
+  @media (hover: hover) and (pointer: fine) { .next__link:hover .next__arrow { transform: translateX(8px); } }
+  @media (min-width: 1024px) {
+    .next__link { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gutter); align-items: end; padding-top: 40px; }
+    .next__text { grid-column: 1 / span 7; }
+    .next__media { grid-column: 9 / span 4; }
+  }
+  @media (prefers-reduced-motion: reduce) { .next__arrow { transition: none; } }
 </style>

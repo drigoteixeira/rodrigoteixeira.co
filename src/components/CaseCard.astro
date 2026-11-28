@@ -5,25 +5,39 @@ interface Props {
   href: string; name: string; year: string; context: string;
   image: ImageKey; lang: Lang; ar: [string, string, string];
   eager?: boolean; sizes?: string; class?: string;
+  /** Número do case, ex.: "01" */
+  index?: string;
+  /** Nome para a transição entre páginas (o card vira a capa do case) */
+  vt?: string;
 }
-const { href, name, year, context, image, lang, ar, eager, sizes, class: cls = '' } = Astro.props;
+const { href, name, year, context, image, lang, ar, eager, sizes, class: cls = '', index, vt } = Astro.props;
 ---
 <a class={`case ${cls}`} href={href}>
-  <MediaBlock image={image} lang={lang} ar={ar} eager={eager} sizes={sizes} />
-  <div class="case__cap">
-    <h3 class="case__name">{name}<span class="case__dot" aria-hidden="true"></span></h3>
-    <span class="case__year tabular">{year}</span>
+  <MediaBlock image={image} lang={lang} ar={ar} eager={eager} sizes={sizes} vt={vt} />
+  <div class:list={['case__cap', { reveal: !eager }]} style="--d:220ms">
+    <div class="case__row">
+      {index && <span class="case__idx tabular" aria-hidden="true">{index}</span>}
+      <h3 class="case__name">{name}</h3>
+      <span class="case__arrow" aria-hidden="true">→</span>
+      <span class="case__year tabular">{year}</span>
+    </div>
+    <p class="case__ctx">{context}</p>
   </div>
-  <p class="case__ctx">{context}</p>
 </a>
 
 <style>
   .case { display: block; }
-  .case__cap { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin-top: 12px; }
-  .case__name { display: flex; align-items: center; gap: 8px; font-size: var(--text-body); line-height: 1.6; font-weight: 400; }
-  .case__dot { width: 8px; height: 8px; border-radius: var(--radius-pill); background: var(--color-accent); opacity: 0; transition: opacity 200ms; }
-  .case__year { font-size: var(--text-body); line-height: 1.6; color: var(--color-muted); }
-  .case__ctx { margin-top: 4px; max-width: 62ch; font-size: var(--text-small); line-height: 1.5; color: var(--color-ink-2); }
-  @media (hover: hover) { .case:hover .case__dot { opacity: 1; } }
-  @media (prefers-reduced-motion: reduce) { .case__dot { transition: none; } }
+  .case__cap { margin-top: 16px; }
+  .case__row { display: flex; align-items: baseline; gap: 14px; }
+  .case__idx { font-size: var(--text-label); font-weight: 500; color: var(--color-accent); min-width: 2ch; }
+  .case__name { font-family: var(--font-display); font-size: clamp(1.25rem, 1rem + .8vw, 1.75rem); line-height: 1.15; letter-spacing: -.025em; font-weight: 500; }
+  .case__arrow { color: var(--color-accent); opacity: 0; transform: translateX(-6px); transition: opacity var(--dur-hover) ease, transform var(--dur-hover) var(--ease-out); }
+  .case__year { margin-left: auto; font-size: var(--text-small); color: var(--color-muted); }
+  .case__ctx { margin-top: 6px; max-width: 52ch; font-size: var(--text-small); line-height: 1.55; color: var(--color-ink-2); }
+  .case:has(.case__idx) .case__ctx { padding-left: calc(2ch + 14px); }
+  @media (hover: hover) and (pointer: fine) {
+    .case:hover .case__arrow { opacity: 1; transform: none; }
+  }
+  .case:focus-visible .case__arrow { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) { .case__arrow { transform: none; transition: opacity var(--dur-hover) ease; } }
 </style>

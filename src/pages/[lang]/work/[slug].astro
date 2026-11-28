@@ -4,7 +4,8 @@ import Split from '../../../components/Split.astro';
 import MediaBlock from '../../../components/MediaBlock.astro';
 import MetaStrip from '../../../components/MetaStrip.astro';
 import NextCase from '../../../components/NextCase.astro';
-import { t, langs, path, caseNames, type Lang, type PageKey } from '../../../lib/i18n';
+import Words from '../../../components/Words.astro';
+import { t, common, langs, path, cases, caseNames, type Lang, type PageKey } from '../../../lib/i18n';
 import { caseDefs } from '../../../lib/cases';
 import { caseLd, breadcrumbLd, abs } from '../../../lib/seo';
 
@@ -14,6 +15,7 @@ export function getStaticPaths() {
 const lang = Astro.params.lang as Lang;
 const { def } = Astro.props;
 const c = t(def.slug as PageKey, lang);
+const cm = common(lang);
 const name = caseNames[def.slug];
 const title = lang === 'pt' ? `${name} · Case de design · Rodrigo Teixeira` : `${name} · Design case · Rodrigo Teixeira`;
 const description = lang === 'pt'
@@ -30,30 +32,48 @@ const ld = [
   ]),
 ];
 const meta = def.meta.map((k) => ({ label: c[`m_${k}`], value: c[`v_${k}`] }));
+const pad = (n: number) => String(n).padStart(2, '0');
+const pos = cases.findIndex((k) => k.slug === def.slug);
+const nextPos = cases.findIndex((k) => k.slug === def.next);
+const next = cases[nextPos];
+// Seções de texto numeradas na ordem em que aparecem (01 Contexto, 02 Processo…)
+let n = 0;
+const sections = def.sections.map((s) => (s.kind === 'text' ? { ...s, index: pad(++n) } : s));
 ---
 <Base lang={lang} current="work" page={`work/${def.slug}` as any} title={title} description={description} og={og} ogAlt={`${name}: ${c.a_lead}`} ld={ld}>
+  <!--
+    Entrada do case: nome = protagonista (palavras sobem) · frase de abertura = apoio
+    · linha de dados = decoração (só opacidade). A capa não anima: quando se vem de um card,
+    ela chega pela transição de página, já no lugar.
+  -->
   <section class="head container" aria-labelledby="case-title">
-    <h1 id="case-title" class="display-l">{caseNames[def.slug]}</h1>
-    <p class="statement lead">{c.a_lead}</p>
+    <p class="head__top mono-label intro-fade" style="--d:200ms">
+      <span><span class="head__no">{cm.caseOf} {pad(pos + 1)}</span><span class="muted"> / {pad(cases.length)}</span></span>
+      <span class="muted tabular">{c.v_year}</span>
+    </p>
+    <div class="grid head__grid">
+      <h1 id="case-title" class="display-xl head__title"><Words text={name} spread={260} /></h1>
+      <p class="statement head__lead intro" style="--d:340ms">{c.a_lead}</p>
+    </div>
   </section>
-
-  <MetaStrip items={meta} />
 
   <section aria-label="Cover" class="container cover">
-    <MediaBlock image={def.cover} lang={lang} ar={['16 / 9', '4 / 3', '4 / 5']} eager />
+    <MediaBlock image={def.cover} lang={lang} ar={['16 / 9', '4 / 3', '4 / 5']} eager vt={`case-${def.slug}`} />
   </section>
 
-  {def.sections.map((s, i) => {
+  <div class="intro-fade" style="--d:480ms"><MetaStrip items={meta} /></div>
+
+  {sections.map((s, i) => {
     const first = i === 0;
     if (s.kind === 'text') {
       return (
-        <Split id={s.id} label={c[s.label]} top={first || s.id === 'result' ? 'xl' : 'l'}>
+        <Split id={s.id} label={c[s.label]} index={(s as any).index} top={first || s.id === 'result' ? 'xl' : 'l'}>
           {s.numbers && (
             <div class="numbers">
-              {s.numbers.map((n) => (
-                <div>
-                  <p class="display-l tabular">{c[n.n]}</p>
-                  <p class="small num-l">{c[n.l]}</p>
+              {s.numbers.map((num) => (
+                <div class="numbers__item">
+                  <p class="numbers__n tabular">{c[num.n]}</p>
+                  <p class="small num-l">{c[num.l]}</p>
                 </div>
               ))}
             </div>
@@ -70,43 +90,43 @@ const meta = def.meta.map((k) => ({ label: c[`m_${k}`], value: c[`v_${k}`] }));
     }
     if (s.kind === 'pair') {
       return (
-        <section class="container gallery reveal">
+        <section class="container gallery">
           <div class="pair">
-            <MediaBlock image={s.a} lang={lang} ar={s.ar} />
-            <MediaBlock image={s.b} lang={lang} ar={s.ar} />
+            <MediaBlock image={s.a} lang={lang} ar={s.ar} sizes="(min-width: 640px) 50vw, 100vw" />
+            <MediaBlock image={s.b} lang={lang} ar={s.ar} delay={120} sizes="(min-width: 640px) 50vw, 100vw" />
           </div>
         </section>
       );
     }
     if (s.kind === 'riaBench') {
       return (
-        <section class="container gallery reveal">
+        <section class="container gallery">
           <MediaBlock image="riaBench" lang={lang} ar={['2.2 / 1', '2.2 / 1', '16 / 9']} />
         </section>
       );
     }
     if (s.kind === 'riaWorkshop') {
       return (
-        <section class="container gallery gallery--tight reveal">
-          <div class="pair">
-            <MediaBlock image="riaW1" lang={lang} ar={['4 / 3', '4 / 3', '4 / 5']} />
-            <MediaBlock image="riaW2" lang={lang} ar={['4 / 3', '4 / 3', '4 / 5']} />
+        <section class="container gallery">
+          <div class="pair pair--offset">
+            <MediaBlock image="riaW1" lang={lang} ar={['4 / 3', '4 / 3', '4 / 5']} sizes="(min-width: 640px) 50vw, 100vw" />
+            <MediaBlock image="riaW2" lang={lang} ar={['4 / 3', '4 / 3', '4 / 5']} delay={120} sizes="(min-width: 640px) 50vw, 100vw" />
           </div>
         </section>
       );
     }
     if (s.kind === 'riaMatrix') {
       return (
-        <section class="container gallery reveal">
+        <section class="container gallery">
           <div class="third">
-            <MediaBlock image="riaMatrix" lang={lang} ar={['3 / 4', '3 / 4', '3 / 4']} />
-            <MediaBlock image="riaStruct" lang={lang} ar={['3 / 2', '3 / 2', '3 / 2']} fit="contain" />
+            <MediaBlock image="riaMatrix" lang={lang} ar={['3 / 4', '3 / 4', '3 / 4']} sizes="(min-width: 640px) 33vw, 100vw" />
+            <MediaBlock image="riaStruct" lang={lang} ar={['3 / 2', '3 / 2', '3 / 2']} fit="contain" delay={120} sizes="(min-width: 640px) 66vw, 100vw" />
           </div>
         </section>
       );
     }
     return (
-      <section class="container gallery gallery--tight reveal">
+      <section class="container gallery">
         <MediaBlock image="riaWire" lang={lang} ar={['16 / 9', '4 / 3', '1 / 1']} fit="contain" />
       </section>
     );
@@ -116,30 +136,41 @@ const meta = def.meta.map((k) => ({ label: c[`m_${k}`], value: c[`v_${k}`] }));
     href={path(lang, `work/${def.next}` as any)}
     label={c.next}
     name={caseNames[def.next]}
-    year={t(def.slug as PageKey, lang)[`nextYear`]}
+    year={next.year}
+    image={next.img}
+    lang={lang}
+    vt={`case-${def.next}`}
+    index={`${cm.caseOf} ${pad(nextPos + 1)}`}
   />
 </Base>
 
 <style>
-  .head { padding-top: 48px; }
-  .lead { margin-top: 32px; max-width: 36ch; }
-  .cover { padding-top: 32px; }
+  .head { padding-top: 32px; }
+  .head__top { display: flex; justify-content: space-between; gap: 16px; padding-bottom: 20px; border-bottom: 1px solid var(--color-line); }
+  .head__no { color: var(--color-accent); }
+  .head__grid { margin-top: clamp(40px, 7vw, 104px); row-gap: 28px; align-items: end; }
+  .head__title, .head__lead { grid-column: 1 / -1; }
+  .head__lead { max-width: 30ch; color: var(--color-ink-2); }
+  .cover { padding-top: clamp(40px, 5vw, 72px); }
   .gallery { padding-top: var(--gap-xl); }
-  .gallery--tight { padding-top: var(--gap-xl); }
   .pair { display: grid; grid-template-columns: 1fr; gap: var(--gutter); }
   .third { display: grid; grid-template-columns: 1fr; gap: var(--gutter); align-items: start; }
   .numbers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--gutter); row-gap: 28px; margin-bottom: 48px; }
-  .num-l { margin-top: 12px; color: var(--color-ink-2); }
+  .numbers__item { container-type: inline-size; border-top: 1px solid var(--color-ink); padding-top: 16px; }
+  .numbers__n { font-family: var(--font-display); font-size: min(7rem, 23cqi); line-height: .9; letter-spacing: -.05em; font-weight: 500; }
+  .num-l { margin-top: 14px; max-width: 24ch; color: var(--color-ink-2); }
   @media (min-width: 640px) {
-    .head { padding-top: 64px; }
-    .lead { margin-top: 40px; }
+    .head { padding-top: 40px; }
     .pair { grid-template-columns: 1fr 1fr; }
+    .pair--offset > :global(:nth-child(2)) { margin-top: 64px; }
     .third { grid-template-columns: 1fr 2fr; }
     .numbers { margin-bottom: 56px; }
   }
   @media (min-width: 1024px) {
-    .head { padding-top: 96px; }
-    .lead { margin-top: 48px; }
+    .head { padding-top: 48px; }
+    .head__title { grid-column: 1 / span 8; }
+    .head__lead { grid-column: 9 / span 4; padding-bottom: .6em; }
+    .pair--offset > :global(:nth-child(2)) { margin-top: 120px; }
     .numbers { margin-bottom: 72px; }
   }
 </style>

@@ -1,0 +1,33 @@
+---
+// Título que entra palavra por palavra, subindo de dentro de uma máscara.
+// Os intervalos encolhem ao longo da frase (curva ease-out nos atrasos), para ler como
+// uma onda e não como um metrônomo. Funciona sem JavaScript (é só CSS).
+interface Props {
+  text: string;
+  /** Atraso inicial, em ms */
+  start?: number;
+  /** Tempo total entre a primeira e a última palavra, em ms */
+  spread?: number;
+  /** Palavras (índice) que ficam em tom secundário a partir daqui; -1 = nenhuma */
+  muteFrom?: number;
+}
+const { text, start = 0, spread = 420, muteFrom = -1 } = Astro.props;
+const words = text.trim().split(/\s+/);
+const n = words.length;
+const delay = (i: number) => {
+  if (n < 2) return start;
+  const t = i / (n - 1);
+  return Math.round(start + spread * (1 - (1 - t) * (1 - t)));
+};
+---
+<span class="words">
+  {words.map((w, i) => (
+    <>
+      <span class="w"><span style={`--d:${delay(i)}ms`} class:list={{ mute: muteFrom >= 0 && i >= muteFrom }}>{w}</span></span>{i < n - 1 ? ' ' : ''}
+    </>
+  ))}
+</span>
+
+<style>
+  .mute { color: var(--color-muted); }
+</style>

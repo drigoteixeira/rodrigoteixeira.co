@@ -73,6 +73,7 @@ const other = lang === 'pt' ? 'en' : 'pt';
   </head>
   <body>
     <a class="skip" href="#conteudo">{c.skip}</a>
+    {page.startsWith('work/') && <div class="progress" aria-hidden="true"></div>}
     <Nav lang={lang} current={current} page={page} />
     <main id="conteudo"><slot /></main>
     <Footer lang={lang} />
@@ -100,15 +101,32 @@ const other = lang === 'pt' ? 'en' : 'pt';
       document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && menu && !menu.hidden) setMenu(false); });
       window.matchMedia('(min-width: 1024px)').addEventListener('change', (m) => { if (m.matches && menu && !menu.hidden) setMenu(false); });
 
-      // Entrada suave das seções (só com JavaScript e sem preferência por menos movimento)
-      const items = document.querySelectorAll('.reveal');
+      // Entradas ao rolar: texto (.reveal) e imagens (.reveal-media). Cada uma acontece uma vez só.
+      const items = document.querySelectorAll('.reveal, .reveal-media');
       if ('IntersectionObserver' in window) {
         const io = new IntersectionObserver((entries) => {
           entries.forEach((en) => { if (en.isIntersecting) { en.target.classList.add('is-in'); io.unobserve(en.target); } });
-        }, { rootMargin: '0px 0px -8% 0px' });
+        }, { rootMargin: '0px 0px -10% 0px' });
         items.forEach((el) => io.observe(el));
       } else {
         items.forEach((el) => el.classList.add('is-in'));
+      }
+
+      // Copiar e-mail (o botão só aparece se o navegador permitir copiar)
+      const copyBtn = document.querySelector<HTMLButtonElement>('[data-copy]');
+      const copyStatus = document.querySelector('[data-copy-status]');
+      if (copyBtn && navigator.clipboard) {
+        copyBtn.hidden = false;
+        let timer = 0;
+        copyBtn.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(copyBtn.dataset.copy || '');
+            copyBtn.classList.add('is-done');
+            if (copyStatus) copyStatus.textContent = copyBtn.querySelector('.copy__b')?.textContent || '';
+            clearTimeout(timer);
+            timer = window.setTimeout(() => { copyBtn.classList.remove('is-done'); if (copyStatus) copyStatus.textContent = ''; }, 2000);
+          } catch { /* sem permissão: o link de e-mail continua funcionando */ }
+        });
       }
     </script>
   </body>
